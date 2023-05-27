@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import pro.sky.telegrambot.entity.Notification;
 import pro.sky.telegrambot.repository.NotificationRepository;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Component
@@ -19,12 +21,14 @@ public class Scheduler {
         this.notificationRepository = notificationRepository;
     }
 
-    @Scheduled(cron = "0 0/1 * * * *")
+    @Scheduled(fixedDelay = 60_000L)
     private void sendNotifications() {
         List<Notification> notifications = notificationRepository.findAll();
         notifications.forEach(n -> {
-            SendMessage msg = new SendMessage(n.getChatID(), "Напоминание: " + n);
-            telegramBot.execute(msg);
+            if (n.getDateTime().equals(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES))) {
+                SendMessage msg = new SendMessage(n.getChatID(), "Напоминание: " + n.getTask());
+                telegramBot.execute(msg);
+            }
         });
     }
 }
