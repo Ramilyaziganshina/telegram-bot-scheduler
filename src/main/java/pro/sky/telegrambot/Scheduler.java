@@ -23,7 +23,7 @@ public class Scheduler {
 
     @Scheduled(cron = "0 0/1 * * * *")
     private void sendNotifications() {
-        List<Notification> notifications = notificationRepository.findAllByDateTime(LocalDateTime.now());
+        List<Notification> notifications = notificationRepository.findAllByDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
         notifications.forEach(n -> {
                 SendMessage msg = new SendMessage(n.getChatID(), "Напоминание: " + n.getTask());
                 telegramBot.execute(msg);
