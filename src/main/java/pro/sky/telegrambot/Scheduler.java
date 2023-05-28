@@ -21,14 +21,12 @@ public class Scheduler {
         this.notificationRepository = notificationRepository;
     }
 
-    @Scheduled(fixedDelay = 60_000L)
+    @Scheduled(cron = "0 0/1 * * * *")
     private void sendNotifications() {
-        List<Notification> notifications = notificationRepository.findAll();
+        List<Notification> notifications = notificationRepository.findAllByDateTime(LocalDateTime.now());
         notifications.forEach(n -> {
-            if (n.getDateTime().equals(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES))) {
                 SendMessage msg = new SendMessage(n.getChatID(), "Напоминание: " + n.getTask());
                 telegramBot.execute(msg);
-            }
         });
     }
 }
